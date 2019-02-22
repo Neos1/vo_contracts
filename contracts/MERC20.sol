@@ -9,9 +9,9 @@ contract MERC20 {
   IERC20 _parent;
 
   struct userBalance{
-    uint256 balance1;
+    uint256 currBalance;
     uint256 blockNum;
-    uint256 balance2;
+    uint256 balanceNext;
   }
 
   mapping (address => userBalance) private _balances;
@@ -30,7 +30,25 @@ contract MERC20 {
   }
 
   function balanceOf(address owner) public view returns (uint256) {
-    return _balances[owner].balance1;
+    uint currentBlock = block.number;
+    uint256 actualBalance;
+    uint256 difference;
+
+    if ( _balances[owner].blockNum > currentBlock ){
+      actualBalance = _balances[owner].currBalance;
+    } else if {
+      actualBalance = _balances[owner].balanceNext;
+      difference = _balances[owner].balanceNext - _balances[owner].currBalance;
+      if (difference > 0){
+        transferFrom(address(this), owner, difference)
+      } else if (difference < 0){
+        difference = difference * (-1);
+        transferFrom(owner, address(this), difference)
+      }
+      _balances[owner].currBalance = _balances[owner].balanceNext;
+    }
+
+    return actualBalance;
   }
 
   function balanceOfERC(address owner) public view returns (uint256) {
