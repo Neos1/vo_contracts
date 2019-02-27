@@ -33,34 +33,29 @@ contract MERC20 {
     return _totalSupply;
   }
 
-  function isVoting() public view returns(uint){
-    uint isVote = _votingContract.isVoting();
+  function isVoting() public view returns(bool){
+    bool isVote = _votingContract.isVoting();
     return isVote;
   }
   
-  function sendVote() public returns(bool) {
+  function sendVote(address owner, uint questionId, bool descision) public returns(bool) {
 
     uint256 balanceMERC = balanceOf(owner);
     uint256 balanceERC = balanceOfERC(owner);
     uint256 availableToken;
 
     if (balanceMERC < balanceERC){
-      availableToken = balanceMERC
+      availableToken = balanceMERC;
     } else if (balanceMERC > balanceERC) {
-      availableToken = balanceERC
+      availableToken = balanceERC;
     } else if (balanceMERC == balanceERC){ 
-      availableToken = balanceMERC
+      availableToken = balanceMERC;
     }
 
-    _vote(voteId, questionId, availableToken)
+    _votingContract.getVote(questionId, owner, descision, availableToken);
     return true;
   }
 
-  function _vote() returns (bool) {
-    
-
-    return true;
-  }
 
   function _addUser(address user, uint256 balance) public returns(uint256) {
     _balances[user].prevBalance = balance;
@@ -92,21 +87,29 @@ contract MERC20 {
     uint256 balanceERC = balanceOfERC(owner);
     uint blockNum;
 
-    if ( blockStamp != 0 ){
-      blockNum = blockStamp;
-    } else {
-      blockNum = block.number;
-    }
+    bool voteActive = isVoting();
 
-    if ( _balances[owner].blockNum < blockNum) {
-      _balances[owner].blockNum = blockNum;
-      _balances[owner].currBalance = balanceERC;
+    if (voteActive){
+      return;
+
     } else {
-      _balances[owner].prevBalance = balanceMERC;
-      _balances[owner].blockNum = blockNum;
-      _balances[owner].currBalance = balanceERC;
+
+      if ( blockStamp != 0 ){
+        blockNum = blockStamp;
+      } else {
+        blockNum = block.number;
+      }
+
+      if ( _balances[owner].blockNum < blockNum) {
+        _balances[owner].blockNum = blockNum;
+        _balances[owner].currBalance = balanceERC;
+      } else {
+        _balances[owner].prevBalance = balanceMERC;
+        _balances[owner].blockNum = blockNum;
+        _balances[owner].currBalance = balanceERC;
+      }
     }
+    
   }
-
 
 }
