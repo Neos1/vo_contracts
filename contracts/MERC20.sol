@@ -43,6 +43,7 @@ contract MERC20 {
     uint256 balanceMERC = balanceOf(owner);
     uint256 balanceERC = balanceOfERC(owner);
     uint256 availableToken;
+    bool voteActive = isVoting();
 
     if (balanceMERC < balanceERC){
       availableToken = balanceMERC;
@@ -52,7 +53,13 @@ contract MERC20 {
       availableToken = balanceMERC;
     }
 
-    _votingContract.getVote(questionId, owner, descision, availableToken);
+    if (voteActive){
+      _votingContract.getVote(questionId, owner, descision, availableToken);
+      updateTokens(owner, 0);
+    } else {
+      return false;
+    }
+    
     return true;
   }
 

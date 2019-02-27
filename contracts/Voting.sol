@@ -9,9 +9,11 @@ contract Voting {
     string text;
     uint groupId;
     string time;
+    // добавить values c значениями за/против 
     mapping (address => bool) votes;
   }
-
+// add Voting struct
+//
   mapping (uint => Question) public _questions;
 
   function addQuestion(uint questionId, uint256 id, uint status, string memory caption, string memory text, uint groupId, string memory time) public {
@@ -20,9 +22,10 @@ contract Voting {
     _questions[questionId].caption = caption;
     _questions[questionId].text = text;
     _questions[questionId].groupId = groupId;
-    _questions[questionId].time = time;
+    _questions[questionId].time = time; //устанавливать в блоках
   }
 
+// rename to setVote 
   function getVote(uint questionId, address voter, bool descision, uint256 voteWeight) public returns(uint, address, bool, uint256) {
     _questions[questionId].votes[voter] = descision;
     return(questionId, voter, descision, voteWeight);
