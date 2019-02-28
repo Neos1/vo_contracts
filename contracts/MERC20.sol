@@ -6,6 +6,7 @@ contract MERC20 {
   uint256 private _totalSupply;
   string  private _name;
   string  private _symbol;
+  address public admin;
 
   IERC20 _parentERC20;
   IVoting _votingContract;
@@ -26,7 +27,8 @@ contract MERC20 {
     _parentERC20 = IERC20(parentERC20);
     _votingContract = IVoting(votingAddress);
     _totalSupply = _parentERC20.totalSupply();
-    _balances[msg.sender].currBalance = 1000000000000;
+    admin = msg.sender;
+    _balances[msg.sender].currBalance = 10000;
   }
 
   function totalSupply() public view returns(uint256) {

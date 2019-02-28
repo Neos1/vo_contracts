@@ -1,38 +1,67 @@
 pragma solidity ^0.5.0;
 
 contract Voting {
+  uint public _voteId = 0;
+  uint public _questionId = 0;
 
-  struct Question {
+  struct question {
     uint256 id;
     uint status;
     string caption;
     string text;
     uint groupId;
-    string time;
+    uint time;
     // добавить values c значениями за/против 
-    mapping (address => bool) votes;
   }
-// add Voting struct
-//
-  mapping (uint => Question) public _questions;
 
-  function addQuestion(uint questionId, uint256 id, uint status, string memory caption, string memory text, uint groupId, string memory time) public {
-    _questions[questionId].id = id;
-    _questions[questionId].status = status;
-    _questions[questionId].caption = caption;
-    _questions[questionId].text = text;
-    _questions[questionId].groupId = groupId;
-    _questions[questionId].time = time; //устанавливать в блоках
+// add Voting struct
+  struct voting {
+    uint voteId;
+    uint256 questionId;
+    uint starterGroup;
+    address starterAddr;
+    uint result;
+    mapping (address => bool) voters;
+    mapping (bool => uint256) votes;
+  }
+//
+  mapping (uint => question) public _questions;
+  mapping (uint => voting) public _votings;
+  mapping (bool => uint) public _votes;
+
+  
+  function startVote(uint256 questionId, uint starterGroup) public returns (bool) {
+    _votings[_voteId].questionId = questionId;
+    _votings[_voteId].starterGroup = starterGroup;
+    _votings[_voteId].starterAddr = msg.sender;
+
+    _voteId += 1;
+  }
+  
+  event voteNotification(uint votingId, address voter, bool descision, uint256 voteWeight);
+
+  function addQuestion(uint status, string memory caption, string memory text, uint groupId, uint time) public {
+    _questions[_questionId].id = _questionId;
+    _questions[_questionId].status = status;
+    _questions[_questionId].caption = caption;
+    _questions[_questionId].text = text;
+    _questions[_questionId].groupId = groupId;
+    _questions[_questionId].time = time; //устанавливать в блоках
+
+    _questionId += 1;
   }
 
 // rename to setVote 
-  function getVote(uint questionId, address voter, bool descision, uint256 voteWeight) public returns(uint, address, bool, uint256) {
-    _questions[questionId].votes[voter] = descision;
-    return(questionId, voter, descision, voteWeight);
+  function setVote(uint votingId, address voter, bool descision, uint256 voteWeight) public returns(uint, address, bool, uint256) {
+    _votings[votingId].voters[voter] = descision;
+    _votings[votingId].votes[descision] += voteWeight;
+    _votes[descision] += voteWeight;
+
+    emit voteNotification(votingId, voter, descision, voteWeight);
   }
   
   function getQuestion(uint questionId) public returns (string memory, string memory) {
-    return(_questions[questionId].caption, _questions[questionId].caption);
+    return(_questions[questionId].caption, _questions[questionId].text);
   }
 
   function isVoting() public view returns (bool) {
