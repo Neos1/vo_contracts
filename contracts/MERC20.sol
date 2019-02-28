@@ -20,6 +20,7 @@ contract MERC20 {
   mapping (address => userBalance) public _balances;
 
   address[] private _ownersAddresses;
+  event userVoted(address who, bool descision);
 
   constructor (string memory name, string memory symbol, address parentERC20, address votingAddress) public{
     _name = name;
@@ -40,7 +41,7 @@ contract MERC20 {
     return isVote;
   }
   
-  function sendVote(address owner, uint questionId, bool descision) public returns(bool) {
+  function sendVote(address owner, uint votingId, bool descision) public returns(bool) {
 
     uint256 balanceMERC = balanceOf(owner);
     uint256 balanceERC = balanceOfERC(owner);
@@ -56,13 +57,13 @@ contract MERC20 {
     }
 
     if (voteActive){
-      _votingContract.getVote(questionId, owner, descision, availableToken);
+      _votingContract.getVote(votingId, owner, descision, availableToken);
       updateTokens(owner, 0);
+      
     } else {
       return false;
     }
-    
-    return true;
+    emit userVoted(owner, descision);
   }
 
 
