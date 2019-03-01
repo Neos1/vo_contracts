@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 import "./IERC20.sol";
-import "./Ivoting.sol";
+import "./IVoting.sol";
 
 contract MERC20 {
   uint256 private _totalSupply;
@@ -41,7 +41,7 @@ contract MERC20 {
     return isVote;
   }
   
-  function sendVote(address owner, uint votingId, bool descision) public returns(bool) {
+  function sendVote(address owner, uint voteId, bool descision) public returns(bool) {
 
     uint256 balanceMERC = balanceOf(owner);
     uint256 balanceERC = balanceOfERC(owner);
@@ -57,7 +57,7 @@ contract MERC20 {
     }
 
     if (voteActive){
-      _votingContract.getVote(votingId, owner, descision, availableToken);
+      _votingContract.setVote(voteId, owner, descision, availableToken);
       updateTokens(owner, 0);
       
     } else {
