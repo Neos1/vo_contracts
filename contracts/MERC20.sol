@@ -57,9 +57,10 @@ contract MERC20 {
     }
 
     if (voteActive){
-      _votingContract.setVote(voteId, owner, descision, availableToken);
-      updateTokens(owner, 0);
-      
+      if (availableToken != 0 ){
+        _votingContract.setVote(voteId, owner, descision, availableToken);
+        updateTokens(owner, 0);
+      }
     } else {
       return false;
     }
