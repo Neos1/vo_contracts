@@ -1,0 +1,35 @@
+{
+  "name": "vo_contracts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "dotenv": "^6.2.0",
+    "ethereumjs-abi": "^0.6.5",
+    "openzeppelin-solidity": "^2.0.0",
+    "truffle": "^5.0.4",
+    "web3": "^1.0.0-beta.37"
+  },
+  "devDependencies": {
+    "@soldoc/markdown": "^0.1.0",
+    "@soldoc/soldoc": "^0.4.3"
+  },
+  "scripts": {
+    "test": "truffle.cmd test",
+    "doc": "node index.js",
+    "deploy-private": "truffle.cmd deploy --network private"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Neos1/vo_contracts.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Neos1/vo_contracts/issues"
+  },
+  "homepage": "https://github.com/Neos1/vo_contracts#readme"
+}
