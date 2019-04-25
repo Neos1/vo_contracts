@@ -1,5 +1,6 @@
 const Questions = artifacts.require('Questions.sol');
 const QuestionGroups = artifacts.require('QuestionGroups.sol');
+const Votings = artifacts.require('Votings.sol');
 const Voter = artifacts.require('Voter.sol');
 const Project = artifacts.require('Project.sol');
 
@@ -10,6 +11,8 @@ module.exports = async function(deployer, network, accounts) {
 
     return deployer.deploy(Questions, config) 
         .then(() => deployer.deploy(QuestionGroups, config))
+        .then(() => deployer.deploy(Votings, config))
+        .then(() => deployer.deploy(Votings, [Voter]))
         .then(() => deployer.link(Questions, [Voter]))
         .then(() => deployer.link(QuestionGroups, [Voter]))
         .then(() => deployer.deploy(Voter, config))

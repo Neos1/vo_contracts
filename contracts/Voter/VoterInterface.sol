@@ -2,6 +2,7 @@ pragma solidity 0.5;
 
 import "../libs/QuestionGroups.sol";
 import "../libs/Questions.sol";
+import "../libs/Votings.sol";
 
 
 /**
@@ -12,6 +13,7 @@ interface VoterInterface {
     // LIBRARIES
     using QuestionGroups for QuestionGroups.List;
     using Questions for Questions.List;
+    using Votings for Votings.List;
     
     // DIFINTIONS
     // new question added event
@@ -24,6 +26,15 @@ interface VoterInterface {
         uint time,
         address target,
         bytes4 methodSelector
+    );
+    // new Votings added event
+    event NewVoting(
+        uint id,
+        uint questionId,
+        Votings.Status status,
+        uint starterGroup,
+        address starterAddress,
+        uint startblock
     );
 
     // METHODS
@@ -76,4 +87,11 @@ interface VoterInterface {
         bytes4 methodSelector
     );
 
+    function startNewVoting ( 
+        uint questionId,
+        Votings.Status status,
+        uint starterGroup,
+        address starterAddress,
+        uint startBlock
+    ) external returns (uint id);
 }

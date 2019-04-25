@@ -2,6 +2,7 @@ pragma solidity 0.5;
 
 import "../libs/QuestionGroups.sol";
 import "../libs/Questions.sol";
+import "../libs/Votings.sol";
 import "./VoterInterface.sol";
 
 
@@ -13,10 +14,12 @@ contract VoterBase is VoterInterface {
 
     Questions.List public questions;
     QuestionGroups.List public groups;
+    Votings.List public votings;
 
     constructor() internal {
         questions.init();
         groups.init();
+        votings.init();
     }
 
     // METHODS
@@ -105,4 +108,39 @@ contract VoterBase is VoterInterface {
         );
     }
 
+/**
+     * @notice adds new voting to voting library
+     * @param _questionId question id
+     * @param _status voting status
+     * @param _starterGroup group which started voting
+     * @param _starterAddress user which started voting
+     * @param _startBlock block number when voting id started
+     * @return new voting id
+     */
+    function startNewVote(
+        uint _questionId,
+        Votings.Status _status,
+        uint _starterGroup,
+        address _starterAddress,
+        uint _startBlock
+    ) external returns (uint id) {
+        
+        Votings.Voting memory voting = Votings.Voting({
+            questionId: _questionId,
+            status: _status,
+            starterGroup: _starterGroup,
+            starterAddress: _starterAddress,
+            startBlock: _startBlock
+        });
+        id = votings.save(voting);
+        emit NewVoting (
+            id,
+            _questionId,
+            _status,
+            _starterGroup,
+            _starterAddress,
+            _startBlock
+        );
+        return id;
+    }
 }
