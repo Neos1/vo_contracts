@@ -23,6 +23,32 @@ contract VoterBase is VoterInterface {
     }
 
     // METHODS
+    function createNewQuestion(
+        uint _groupId,
+        Questions.Status _status,
+        string memory _caption,
+        string memory _text,
+        uint _time,
+        address _target,
+        bytes4 _methodSelector,
+        string memory _formula,
+        bytes32[] memory _parameters
+    ) internal returns (Questions.Question memory _question) {
+        Questions.Question memory question = Questions.Question({
+            groupId: _groupId,
+            status: _status,
+            caption: _caption,
+            text: _text,
+            time: _time,
+            target: _target,
+            methodSelector: _methodSelector,
+            formula: _formula,
+            parameters: _parameters
+        });
+
+        return question;
+    }
+
     /**
      * @notice adds new question to question library
      * @param _groupId question group id
@@ -35,27 +61,32 @@ contract VoterBase is VoterInterface {
      * @return new question id
      */
     function saveNewQuestion(
+        uint _id,
         uint _groupId,
         Questions.Status _status,
         string calldata _caption,
         string calldata _text,
         uint _time,
         address _target,
-        bytes4 _methodSelector
+        bytes4 _methodSelector,
+        string calldata _formula,
+        bytes32[] calldata _parameters
     ) external returns (uint id) {
         // validate params
         // call questions.save()
         // example
-        Questions.Question memory question = Questions.Question({
-            groupId: _groupId,
-            status: _status,
-            caption: _caption,
-            text: _text,
-            time: _time,
-            target: _target,
-            methodSelector: _methodSelector
-        });
-        id = questions.save(question);
+        Questions.Question memory question = createNewQuestion(
+            _groupId,
+            _status,
+            _caption,
+            _text,
+            _time,
+            _target,
+            _methodSelector,
+            _formula,
+            _parameters
+        );
+        id = questions.save(question, _id);
         emit NewQuestion(
             id,
             _groupId,
@@ -95,16 +126,22 @@ contract VoterBase is VoterInterface {
         string memory text,
         uint time,
         address target,
-        bytes4 methodSelector
+        bytes4 methodSelector,
+        string memory _formula,
+        bytes32[] memory _parameters
     ) {
+        uint id = _id;
+
         return (
-            questions.question[_id].groupId,
-            questions.question[_id].status,
-            questions.question[_id].caption,
-            questions.question[_id].text,
-            questions.question[_id].time,
-            questions.question[_id].target,
-            questions.question[_id].methodSelector
+            questions.question[id].groupId,
+            questions.question[id].status,
+            questions.question[id].caption,
+            questions.question[id].text,
+            questions.question[id].time,
+            questions.question[id].target,
+            questions.question[id].methodSelector,
+            questions.question[id].formula,
+            questions.question[id].parameters
         );
     }
 

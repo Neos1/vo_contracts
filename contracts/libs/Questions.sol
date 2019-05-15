@@ -25,6 +25,8 @@ library Questions {
         address target;
         // method to be called
         bytes4 methodSelector;
+        string formula;
+        bytes32[] parameters;
     }
 
     struct List {
@@ -37,11 +39,11 @@ library Questions {
         _self.questionIdIndex = 1;
     }
 
-    function save(List storage _self, Question memory _question) internal returns (uint id) {
+    function save(List storage _self, Question memory _question, uint _id) internal returns (uint id) {
         bytes32 name = keccak256(abi.encodePacked(_question.caption));
         uint questionId = _self.questionIdIndex;
         require(!exists(_self, name), "provided group already exists");
-        _self.question[questionId] = _question;
+        _self.question[_id] = _question;
         _self.uniqNames[name] = questionId;
         _self.questionIdIndex++;
         return questionId;

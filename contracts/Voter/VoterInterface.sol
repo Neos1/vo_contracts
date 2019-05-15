@@ -50,13 +50,16 @@ interface VoterInterface {
      * @return new question id
      */
     function saveNewQuestion(
+        uint _id,
         uint _groupId,
         Questions.Status _status,
         string calldata _caption,
         string calldata _text,
         uint _time,
         address _target,
-        bytes4 _methodSelector
+        bytes4 _methodSelector,
+        string calldata _formula,
+        bytes32[] calldata _parameters
     ) external returns (uint id);
 
     /**
@@ -84,7 +87,9 @@ interface VoterInterface {
         string memory text,
         uint time,
         address target,
-        bytes4 methodSelector
+        bytes4 methodSelector,
+        string memory _formula,
+        bytes32[] memory _parameters
     );
 
     function startNewVoting ( 
