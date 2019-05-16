@@ -16,13 +16,29 @@ contract VoterBase is VoterInterface {
     QuestionGroups.List public groups;
     Votings.List public votings;
 
-    constructor() internal {
+    address internal ERC20;
+
+    constructor(address _address) internal {
         questions.init();
         groups.init();
         votings.init();
+        ERC20 = _address;
     }
 
     // METHODS
+    /**
+     * @notice creates new question to saveNewQuestion function
+     * @param _groupId question group id
+     * @param _status question status
+     * @param _caption question name
+     * @param _text question description
+     * @param _time question length
+     * @param _target target address to call
+     * @param _methodSelector method to call
+     * @param _formula voting formula
+     * @param _parameters parameters of inputs
+     * @return new question id
+     */
     function createNewQuestion(
         uint _groupId,
         Questions.Status _status,
@@ -33,7 +49,7 @@ contract VoterBase is VoterInterface {
         bytes4 _methodSelector,
         string memory _formula,
         bytes32[] memory _parameters
-    ) internal returns (Questions.Question memory _question) {
+    ) private returns (Questions.Question memory _question) {
         Questions.Question memory question = Questions.Question({
             groupId: _groupId,
             status: _status,
@@ -48,6 +64,7 @@ contract VoterBase is VoterInterface {
 
         return question;
     }
+    
 
     /**
      * @notice adds new question to question library
@@ -58,6 +75,8 @@ contract VoterBase is VoterInterface {
      * @param _time question length
      * @param _target target address to call
      * @param _methodSelector method to call
+     * @param _formula voting formula
+     * @param _parameters parameters of inputs
      * @return new question id
      */
     function saveNewQuestion(
@@ -72,31 +91,22 @@ contract VoterBase is VoterInterface {
         string calldata _formula,
         bytes32[] calldata _parameters
     ) external returns (uint id) {
-        // validate params
-        // call questions.save()
-        // example
-        Questions.Question memory question = createNewQuestion(
-            _groupId,
-            _status,
-            _caption,
-            _text,
-            _time,
-            _target,
-            _methodSelector,
-            _formula,
-            _parameters
-        );
-        id = questions.save(question, _id);
-        emit NewQuestion(
-            id,
-            _groupId,
-            _status,
-            _caption,
-            _text,
-            _time,
-            _target,
-            _methodSelector
-        );
+        uint questionId = _id;
+        uint group = _groupId; 
+        Questions.Status status = _status; 
+        string memory caption = _caption; 
+        string memory text = _text; 
+        uint time = _time; 
+        address target = _target; 
+        bytes4 method = _methodSelector; 
+        string memory formula = _formula; 
+        bytes32[] memory params = _parameters; 
+
+        Questions.Question memory question = createNewQuestion( group, status, caption, text, time, target, method, formula, params);
+
+        id = questions.save(question, questionId);
+
+        emit NewQuestion( group, status, caption, text, time, target, method );
         return id;
     }
 
@@ -131,7 +141,6 @@ contract VoterBase is VoterInterface {
         bytes32[] memory _parameters
     ) {
         uint id = _id;
-
         return (
             questions.question[id].groupId,
             questions.question[id].status,
@@ -150,34 +159,46 @@ contract VoterBase is VoterInterface {
      * @param _questionId question id
      * @param _status voting status
      * @param _starterGroup group which started voting
-     * @param _starterAddress user which started voting
-     * @param _startBlock block number when voting id started
      * @return new voting id
      */
-    function startNewVote(
+    function startNewVoting(
         uint _questionId,
         Votings.Status _status,
-        uint _starterGroup,
-        address _starterAddress,
-        uint _startBlock
+        uint _starterGroup
     ) external returns (uint id) {
-        
         Votings.Voting memory voting = Votings.Voting({
             questionId: _questionId,
             status: _status,
             starterGroup: _starterGroup,
-            starterAddress: _starterAddress,
-            startBlock: _startBlock
+            starterAddress: msg.sender,
+            startBlock: block.number
         });
         id = votings.save(voting);
+
         emit NewVoting (
             id,
             _questionId,
             _status,
             _starterGroup,
-            _starterAddress,
-            _startBlock
+            msg.sender,
+            block.number
         );
         return id;
+    }
+
+    function voting( uint _id) public view returns (
+        Votings.Status status,
+        string memory caption,
+        string memory text,
+        uint startBlock
+    ){
+        uint questionId = votings.voting[_id].questionId;
+
+        return (
+            votings.voting[_id].status,
+            questions.question[questionId].caption,
+            questions.question[questionId].text,
+            votings.voting[_id].startBlock
+        );
     }
 }

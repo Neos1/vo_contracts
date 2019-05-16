@@ -14,11 +14,11 @@ interface VoterInterface {
     using QuestionGroups for QuestionGroups.List;
     using Questions for Questions.List;
     using Votings for Votings.List;
+
     
     // DIFINTIONS
     // new question added event
     event NewQuestion(
-        uint id,
         uint groupId,
         Questions.Status status,
         string caption,
@@ -47,6 +47,8 @@ interface VoterInterface {
      * @param _time question length
      * @param _target target address to call
      * @param _methodSelector method to call
+     * @param _formula voting formula
+     * @param _parameters parameters of inputs
      * @return new question id
      */
     function saveNewQuestion(
@@ -92,11 +94,16 @@ interface VoterInterface {
         bytes32[] memory _parameters
     );
 
-    function startNewVoting ( 
+    function startNewVoting( 
         uint questionId,
         Votings.Status status,
-        uint starterGroup,
-        address starterAddress,
-        uint startBlock
+        uint starterGroup
     ) external returns (uint id);
+
+    function voting(uint id) external view returns (
+        Votings.Status status,
+        string memory caption,
+        string memory text,
+        uint timeLeft
+    );
 }
