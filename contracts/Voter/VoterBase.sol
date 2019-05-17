@@ -4,6 +4,9 @@ import "../libs/QuestionGroups.sol";
 import "../libs/Questions.sol";
 import "../libs/Votings.sol";
 import "./VoterInterface.sol";
+import "./IERC20.sol";
+
+
 
 
 /**
@@ -16,16 +19,18 @@ contract VoterBase is VoterInterface {
     QuestionGroups.List public groups;
     Votings.List public votings;
 
-    address internal ERC20;
+    IERC20 public ERC20;
 
-    constructor(address _address) internal {
+    constructor() public {
         questions.init();
         groups.init();
         votings.init();
-        ERC20 = _address;
     }
 
     // METHODS
+    function setERC20(address _address) public returns (address erc20) {
+        ERC20 = IERC20(_address);
+    }
     /**
      * @notice creates new question to saveNewQuestion function
      * @param _groupId question group id
@@ -161,6 +166,7 @@ contract VoterBase is VoterInterface {
      * @param _starterGroup group which started voting
      * @return new voting id
      */
+
     function startNewVoting(
         uint _questionId,
         Votings.Status _status,
@@ -173,6 +179,7 @@ contract VoterBase is VoterInterface {
             starterAddress: msg.sender,
             startBlock: block.number
         });
+        
         id = votings.save(voting);
 
         emit NewVoting (
@@ -186,19 +193,26 @@ contract VoterBase is VoterInterface {
         return id;
     }
 
-    function voting( uint _id) public view returns (
+    function voting(uint _id) public view returns (
         Votings.Status status,
         string memory caption,
         string memory text,
         uint startBlock
     ){
         uint questionId = votings.voting[_id].questionId;
-
         return (
             votings.voting[_id].status,
             questions.question[questionId].caption,
             questions.question[questionId].text,
             votings.voting[_id].startBlock
         );
+    }
+
+    function sendVote(uint _voteId, bool _choice) public returns (bool result) {
+        uint balance = ERC20.balanceOf(msg.sender);
+        ERC20.transferFrom(msg.sender, address(this), balance);
+        votings.voting[_voteId].voteWeigths[msg.sender] = balance;
+        votings.voting[_voteId].votedUsers[msg.sender] = true;
+        return true;
     }
 }

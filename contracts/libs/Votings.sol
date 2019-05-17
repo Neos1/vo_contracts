@@ -23,7 +23,7 @@ library Votings {
     */
     mapping (address => bool) votedUsers;
     // contains total weights for voting variants
-    mapping (bool => uint) voteWeigths;
+    mapping (address => uint) voteWeigths;
   }
 
   struct List {

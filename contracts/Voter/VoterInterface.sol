@@ -104,6 +104,6 @@ interface VoterInterface {
         Votings.Status status,
         string memory caption,
         string memory text,
-        uint timeLeft
+        uint startBlock
     );
 }
