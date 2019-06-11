@@ -1,4 +1,4 @@
-pragma solidity 0.5;
+pragma solidity 0.4;
 
 library Votings {
 
@@ -14,31 +14,38 @@ library Votings {
     // ? user, who started the voting
     address starterAddress;
     // ? block when voting was started
-    uint startBlock;
+    uint startTime;
+    uint endTime;
     // ? contains pairs of (address => vote) for every user
-    mapping (address => bool) votes;
-    /** ? contains pairs of (address => bool) for each users:
-          true - user voted
-          false - user not voted
-    */
-    mapping (address => bool) votedUsers;
+    mapping (address=> mapping(address => uint)) votes;
+
     // contains total weights for voting variants
-    mapping (address => uint) voteWeigths;
+    mapping (address=> mapping(address => uint256)) voteWeigths;
+    mapping (uint=> mapping(address => uint256)) descisionWeights;
+    bytes data;
   }
 
   struct List {
     uint votingIdIndex;
     mapping (uint => Voting) voting;
+    mapping (uint=> uint) descision;
   }
 
   function init(List storage _self) internal {
-        _self.votingIdIndex = 1;
-    }
+    _self.votingIdIndex = 1;
+  }
+
 
   function save(List storage _self, Voting memory _voting) internal returns (uint id) {
-        uint votingId = _self.votingIdIndex;
-        _self.voting[votingId] = _voting;
-        _self.votingIdIndex++;
-        return votingId;
-    }
+    uint votingId = _self.votingIdIndex;
+    _self.voting[votingId] = _voting;
+    _self.votingIdIndex++;
+    return votingId;
+  }
+
+  function close(List storage _self) internal {
+    uint votingId = _self.votingIdIndex - 1;
+    _self.voting[votingId].status = Status.ENDED;
+  }
+
 }

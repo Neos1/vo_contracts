@@ -1,33 +1,33 @@
 pragma solidity 0.4;
 
 
-library QuestionGroups {
-    
-    enum GroupType {
-        // system group
-        SYSTEM,
-        // user group
-        CUSTOM
+library UserGroups {
+
+    enum GroupStatus {
+        // deleted or inactive question
+        INACTIVE,
+        // active question
+        ACTIVE
     }
 
-    struct Group {
-        // group type
-        GroupType groupType;
-        // group name
+    struct UserGroup {
         string name;
+        string groupType;
+        GroupStatus status;
+        address groupAddr;
     }
 
     struct List {
         uint groupIdIndex;
         mapping (bytes32 => uint) uniqNames;
-        mapping (uint => Group) group;
+        mapping (uint => UserGroup) group;
     }
 
     function init(List storage _self) internal {
         _self.groupIdIndex = 1;
     }
 
-    function save(List storage _self, Group memory _group) internal returns (uint id) {
+    function save(List storage _self, UserGroup memory _group) internal returns (uint id) {
         bytes32 name = keccak256(abi.encodePacked(_group.name));
         uint groupId = _self.groupIdIndex;
         require(!exists(_self, name), "provided group already exists");

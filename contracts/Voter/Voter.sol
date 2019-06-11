@@ -1,11 +1,10 @@
-pragma solidity 0.5;
+pragma solidity 0.4;
 
 import "./VoterBase.sol";
-import "./IERC20.sol";
 
 
 contract Voter is VoterBase {
-
+    
     IERC20 public ERC20;
 
     constructor(address _address) public {

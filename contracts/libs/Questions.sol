@@ -1,4 +1,4 @@
-pragma solidity 0.5;
+pragma solidity 0.4;
 
 
 library Questions {
@@ -25,7 +25,7 @@ library Questions {
         address target;
         // method to be called
         bytes4 methodSelector;
-        string formula;
+        uint[] formula;
         bytes32[] parameters;
     }
 
