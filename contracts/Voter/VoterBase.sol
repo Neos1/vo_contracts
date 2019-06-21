@@ -23,16 +23,16 @@ contract VoterBase is VoterInterface {
 
     IERC20 public ERC20;
 
-    constructor() public {
+    constructor(address _addr) public {
         questions.init();
         groups.init();
         votings.init();
-        userGroups.init();
     }
 
     // METHODS
     function setERC20(address _address) public returns (address erc20) {
         ERC20 = IERC20(_address);
+        userGroups.init(_address);
     }
 
     /*
@@ -273,20 +273,24 @@ contract VoterBase is VoterInterface {
         return votings.descision[_id];
     }   
 
-    function closeVoting() external {
+        function closeVoting() external {
         uint votingId = votings.votingIdIndex - 1;
         uint questionId = votings.voting[votingId].questionId;
         
         uint[] storage formula = questions.question[questionId].formula;
-        uint256 positiveVotes = votings.voting[votingId].descisionWeights[1][address(ERC20)];
-        uint256 negativeVotes = votings.voting[votingId].descisionWeights[2][address(ERC20)];
-        uint256 totalSupply = ERC20.totalSupply();
 
         uint entity = formula[0];
+        uint groupId = formula[1];
         uint parity = formula[2];
         uint percent = formula[3];
         uint quorumPercent;
         uint condition;
+
+        string memory groupName = userGroups.names[groupId];
+
+        uint256 positiveVotes = votings.voting[votingId].descisionWeights[1][groupName];
+        uint256 negativeVotes = votings.voting[votingId].descisionWeights[2][groupName];
+        uint256 totalSupply = ERC20.totalSupply();
 
         uint256 quorum = positiveVotes + negativeVotes;
         uint descision;
@@ -323,6 +327,7 @@ contract VoterBase is VoterInterface {
         votings.descision[votingId] = descision;
         votings.voting[votingId].status = Votings.Status.ENDED;
     }
+
 
     function getVotes(uint _votingId) external returns (uint256[3] memory _votes) {
         uint256[3] memory votes;
@@ -410,4 +415,9 @@ contract VoterBase is VoterInterface {
         });
         userGroups.save(userGroup);
     } 
+
+    function setCustomGroupAdmin(address group, address admin) returns (bool) {    
+        require(group.call( bytes4( keccak256("setAdmin(address)")), admin));
+        return true;
+    }
 }
