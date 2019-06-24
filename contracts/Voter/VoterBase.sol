@@ -322,7 +322,7 @@ contract VoterBase is VoterInterface {
     function getVotes(uint _votingId) external returns (uint256[3] memory _votes) {
         uint questionId = votings.voting[_votingId].questionId;
         uint groupId = questions.question[questionId].groupId;
-        string groupName = userGroups.names[groupId];
+        string memory groupName = userGroups.names[groupId];
         uint256[3] memory votes;
         votes[0] = votings.voting[_votingId].descisionWeights[1][groupName];
         votes[1] = votings.voting[_votingId].descisionWeights[2][groupName];
@@ -343,7 +343,7 @@ contract VoterBase is VoterInterface {
         uint256 balance = ERC20.balanceOf(msg.sender);
         uint questionId = votings.voting[_voteId].questionId;
         uint groupId = questions.question[questionId].groupId;
-        string groupName = userGroups.names[groupId];
+        string memory groupName = userGroups.names[groupId];
         if (block.timestamp < timestamp ) {
             if (votings.voting[_voteId].votes[address(ERC20)][msg.sender] == 0) {
                 ERC20.approve(msg.sender, address(this), balance);

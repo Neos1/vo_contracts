@@ -1,25 +1,27 @@
 pragma solidity 0.4;
 
 import "./IERC20.sol";
+import "./MERCInterface.sol";
 
-contract MERC20 {
-  string private name;
-  string private symbol;
-  uint256 private decimals;
+contract MERC20 is MERCInterface {
+  string private _name;
+  string private _symbol;
+  uint256 private _decimals;
   address public admin;
   IERC20 private parentERC;
 
   mapping (address => userBalance) balances;
   address[] users;
 
-  constructor (string _name, string _symbol, address _parentAddr ) public {
-    name = _name;
-    symbol = _symbol;
+  constructor (string name, string symbol, address _parentAddr ) public {
+    _name = name;
+    _symbol = symbol;
     parentERC = IERC20(_parentAddr);
-    decimals = parentERC.totalSupply();
+    _decimals = parentERC.totalSupply();
     admin = msg.sender;
-    balances[msg.sender].currBalance = decimals;
+    balances[msg.sender].currBalance = _decimals;
   }
+
 
   struct userBalance{
     uint256 prevBalance;
@@ -28,14 +30,14 @@ contract MERC20 {
   }
 
 
-  function _symbol() public view returns(string) {
-    return symbol;
+  function symbol() public view returns(string) {
+    return _symbol;
   }
-  function _name() public view returns(string) {
-    return name;
+  function name() public view returns(string) {
+    return _name;
   }
-  function _decimals() public view returns(uint256) {
-    return decimals;
+  function totalSupply() public view returns(uint256) {
+    return _decimals;
   }
 
   function balanceOfERC(address owner) public returns (uint256) {
@@ -44,13 +46,40 @@ contract MERC20 {
   }
 
   function balanceOf(address who) returns (uint256) {
-    
+    return balances[who].currBalance;
+  }
+
+  function findUser(address user) returns (uint) {
+    uint usersLength = users.length;
+		uint matched = 0;
+		for (uint i = 0; i < usersLength; i++) {
+			if (users[i] == user) {
+				matched = i;
+			}
+		}
+		return matched;
+  }
+
+  function findEmptyUser() returns (uint) {
+    uint usersLength = users.length;
+		uint matched = 0;
+		for (uint i = 0; i < usersLength; i++) {
+			if (users[i] == 0) {
+				matched = i;
+			}
+		}
+		return matched;
   }
 
   function _addUser(address user, uint256 balance) public returns(uint256) {
-    balances[user].prevBalance = balance;
-    balances[user].currBalance = balance;
-    balances[user].blockNum = block.number;
+		uint isUser = findUser(user);
+		uint emptyIndex = findEmptyUser();
+		if (isUser == 0) {
+			balances[user].prevBalance = balance;
+			balances[user].currBalance = balance;
+			balances[user].blockNum = block.number;
+			users[emptyIndex] = user;
+		}
     return balances[user].currBalance;
   }
 
