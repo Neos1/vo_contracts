@@ -1,6 +1,5 @@
 pragma solidity 0.4;
 
-import "./IERC20.sol";
 import "./MERCInterface.sol";
 
 contract MERC20 is MERCInterface {
@@ -8,48 +7,40 @@ contract MERC20 is MERCInterface {
   string private _symbol;
   uint256 private _decimals;
   address public admin;
-  IERC20 private parentERC;
+  address public owner;
 
-  mapping (address => userBalance) balances;
+  mapping (address => uint256) balances;
+	mapping (uint => mapping (address => uint256)) userBalances;
   address[] users;
 
-  constructor (string name, string symbol, address _parentAddr ) public {
+  constructor (string name, string symbol, uint256 decimals ) public {
     _name = name;
     _symbol = symbol;
-    parentERC = IERC20(_parentAddr);
-    _decimals = parentERC.totalSupply();
+    _decimals = decimals;
     admin = msg.sender;
-    balances[msg.sender].currBalance = _decimals;
+    owner = msg.sender;
+    balances[msg.sender] = _decimals;
   }
 
-
-  struct userBalance{
-    uint256 prevBalance;
-    uint256 currBalance;
-    uint256 blockNum;
-  }
-
-
-  function symbol() public view returns(string) {
+  function symbol() external  returns(string) {
     return _symbol;
   }
-  function name() public view returns(string) {
+  function name() external  returns(string) {
     return _name;
   }
-  function totalSupply() public view returns(uint256) {
+  function totalSupply() external  returns(uint256) {
     return _decimals;
   }
 
-  function balanceOfERC(address owner) public returns (uint256) {
-    uint256 balance = parentERC.balanceOf(owner);
-    return balance;
+  function getUsers() external  returns (address[] userList) {
+    return users;
   }
 
-  function balanceOf(address who) returns (uint256) {
-    return balances[who].currBalance;
+  function balanceOf(address who) external returns (uint256) {
+    return balances[who];
   }
 
-  function findUser(address user) returns (uint) {
+  function findUser(address user) external returns (uint) {
     uint usersLength = users.length;
 		uint matched = 0;
 		for (uint i = 0; i < usersLength; i++) {
@@ -60,7 +51,7 @@ contract MERC20 is MERCInterface {
 		return matched;
   }
 
-  function findEmptyUser() returns (uint) {
+  function findEmptyUser() external returns (uint) {
     uint usersLength = users.length;
 		uint matched = 0;
 		for (uint i = 0; i < usersLength; i++) {
@@ -71,29 +62,40 @@ contract MERC20 is MERCInterface {
 		return matched;
   }
 
-  function _addUser(address user, uint256 balance) public returns(uint256) {
-		uint isUser = findUser(user);
-		uint emptyIndex = findEmptyUser();
+  function _addUser(address user, uint256 balance) external returns(uint256) {
+		uint isUser = this.findUser(user);
+		uint emptyIndex = this.findEmptyUser(); 
 		if (isUser == 0) {
-			balances[user].prevBalance = balance;
-			balances[user].currBalance = balance;
-			balances[user].blockNum = block.number;
+			balances[user] = balance;
+      userBalances[emptyIndex][user] = balance;
 			users[emptyIndex] = user;
 		}
-    return balances[user].currBalance;
+    return balances[user];
   }
 
-  function transferFrom(address _who, address _to, uint256 value) {
+
+  function transferFrom(address _who, address _to, uint256 value) external {
+    require(msg.sender == admin);
     require(_who != address(0), "MERC20: transfer from the zero address");
     require(_to != address(0), "MERC20: transfer to the zero address");
+    require(balances[_who] >= value, "MERC20: Token value must be lower or equal");
 
-    balances[_who].prevBalance = balances[_who].currBalance;
-    balances[_to].prevBalance = balances[_to].currBalance;
-    balances[_who].currBalance = balances[_who].currBalance - value;
-    balances[_to].currBalance = balances[_to].currBalance + value;
+    uint index = this.findUser(_to);
+    if (index == 0 ) {
+      index = users.length;
+      users.push(_to);
+      userBalances[index][_to] = value;
+      balances[_who] = balances[_who] - value;
+      balances[_to] = balances[_to] + value;
+    } else {
+      userBalances[index][_to] += value;
+      balances[_who] = balances[_who] - value;
+      balances[_to] = balances[_to] + value;
+    }
+    
   }
 
-  function setAdmin(address _newAdmin) {
+  function setAdmin(address _newAdmin) external {
     admin = _newAdmin;
   }
 
